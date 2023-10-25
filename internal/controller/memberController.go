@@ -29,6 +29,16 @@ func (c MemberController) GetJoinCafeIds(ctx context.Context, userId int, reqPag
 	return res.NewIdTotalCountDto(cafeIds, count), nil
 }
 
+func (c MemberController) GetMemberInfo(ctx context.Context, cafeId int, userId int) (res.MemberCafeInfoDto, error) {
+	md, err := c.s.GetMemberInfo(ctx, cafeId, userId)
+	if err != nil {
+		return res.MemberCafeInfoDto{}, err
+	}
+	dto := res.ToMemberCafeInfoDto(md)
+	return dto, nil
+
+}
+
 func NewMemberController(s service.MemberService) MemberController {
 	return MemberController{s: s}
 }

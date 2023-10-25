@@ -17,11 +17,6 @@ type Member struct {
 	CreatedAt time.Time `bun:"created_at,notnull"`
 }
 
-type CafeIdModel struct {
-	bun.BaseModel `bun:"table:members,alias:m"`
-	CafeId        int `bun:"cafe_id,notnull"`
-}
-
 func ToModel(d domain.MemberDomain) Member {
 	return Member{
 		Id:        d.Id,
@@ -31,4 +26,20 @@ func ToModel(d domain.MemberDomain) Member {
 		IsBanned:  d.IsBanned,
 		CreatedAt: d.CreatedAt,
 	}
+}
+
+func (m Member) ToDomain() domain.MemberDomain {
+	return domain.MemberDomain{
+		Id:        m.Id,
+		CafeId:    m.CafeId,
+		UserId:    m.UserId,
+		Nickname:  m.Nickname,
+		IsBanned:  m.IsBanned,
+		CreatedAt: m.CreatedAt,
+	}
+}
+
+type CafeIdModel struct {
+	bun.BaseModel `bun:"table:members,alias:m"`
+	CafeId        int `bun:"cafe_id,notnull"`
 }
