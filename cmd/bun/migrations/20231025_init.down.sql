@@ -2,4 +2,4 @@ SET statement_timeout = 0;
 
 --bun:split
 
-DROP table "public"."users";
+DROP table "public"."members";
