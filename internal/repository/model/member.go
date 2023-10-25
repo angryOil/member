@@ -17,6 +17,11 @@ type Member struct {
 	CreatedAt time.Time `bun:"created_at,notnull"`
 }
 
+type CafeIdModel struct {
+	bun.BaseModel `bun:"table:members,alias:m"`
+	CafeId        int `bun:"cafe_id,notnull"`
+}
+
 func ToModel(d domain.MemberDomain) Member {
 	return Member{
 		Id:        d.Id,

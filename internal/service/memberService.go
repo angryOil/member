@@ -5,6 +5,7 @@ import (
 	"errors"
 	"member/internal/domain"
 	"member/internal/repository"
+	page2 "member/page"
 )
 
 type MemberService struct {
@@ -18,6 +19,11 @@ func (s MemberService) RequestJoin(ctx context.Context, d domain.MemberDomain) e
 	}
 	err = s.repo.CreateMember(ctx, d)
 	return err
+}
+
+func (s MemberService) GetJoinCafeIds(ctx context.Context, userId int, reqPage page2.ReqPage) ([]int, int, error) {
+	cafeIds, count, err := s.repo.GetCafeIdsByUserId(ctx, userId, reqPage)
+	return cafeIds, count, err
 }
 
 func validRequestMember(m domain.MemberDomain) error {

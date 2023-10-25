@@ -6,6 +6,7 @@ import (
 	"log"
 	"member/internal/controller"
 	"member/internal/controller/req"
+	page2 "member/page"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,12 +30,17 @@ func NewHandler(c controller.MemberController) http.Handler {
 
 	// 가장 많이 사용될 기능 cafe 의 모든액션하기전 거쳐갈 기능임(auth 기능)
 	m.HandleFunc("/members/{cafeId:[0-9]+}/info/{userId:[0-9]+}", h.getMemberInfo).Methods(http.MethodGet)
-	// 가입한 카페 리스트 조회
-	m.HandleFunc("/members/list/{userId:[0-9]+}", h.getMyCafeList).Methods(http.MethodGet)
-	// 가입한 멤버 리스트 조회
-	m.HandleFunc("/members/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
+
+	// 내 카페 id 리스트 조회
+	m.HandleFunc("/members/list/{userId:[0-9]+}", h.getMyCafeIdList).Methods(http.MethodGet)
+
 	// 카페가입 요청
 	m.HandleFunc("/members/{cafeId:[0-9]+}/join/{userId:[0-9]+}", h.requestJoin).Methods(http.MethodPost)
+
+	// 관리자 기능
+
+	// 가입한 멤버 리스트 조회
+	m.HandleFunc("/members/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
 	// 밴목록 확인
 	m.HandleFunc("/members/{cafeId:[0-9]+}/ban", h.getBanedList).Methods(http.MethodGet)
 	// 밴상태 수정
@@ -49,6 +55,31 @@ func NewHandler(c controller.MemberController) http.Handler {
 
 func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (h Handler) getMyCafeIdList(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId, err := strconv.Atoi(vars["userId"])
+	if err != nil {
+		http.Error(w, "invalid user id ", http.StatusBadRequest)
+		return
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 0
+	}
+	size, err := strconv.Atoi(r.URL.Query().Get("size"))
+	if err != nil {
+		size = 0
+	}
+	idsDto, err := h.c.GetJoinCafeIds(r.Context(), userId, page2.NewReqPage(page, size))
+	data, err := json.Marshal(idsDto)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 func (h Handler) requestJoin(w http.ResponseWriter, r *http.Request) {
@@ -104,9 +135,5 @@ func (h Handler) updateBan(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) getMemberList(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func (h Handler) getMyCafeList(w http.ResponseWriter, r *http.Request) {
 
 }
