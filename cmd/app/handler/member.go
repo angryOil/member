@@ -1,9 +1,14 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
+	"log"
 	"member/internal/controller"
+	"member/internal/controller/req"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type Handler struct {
@@ -23,15 +28,17 @@ func NewHandler(c controller.MemberController) http.Handler {
 	h := Handler{c: c}
 
 	// 가장 많이 사용될 기능 cafe 의 모든액션하기전 거쳐갈 기능임(auth 기능)
-	m.HandleFunc("/member/{cafeId:[0-9]+}/info", h.getMyInfo).Methods(http.MethodGet)
+	m.HandleFunc("/members/{cafeId:[0-9]+}/info/{userId:[0-9]+}", h.getMemberInfo).Methods(http.MethodGet)
+	// 가입한 카페 리스트 조회
+	m.HandleFunc("/members/list/{userId:[0-9]+}", h.getMyCafeList).Methods(http.MethodGet)
 	// 가입한 멤버 리스트 조회
-	m.HandleFunc("/member/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
+	m.HandleFunc("/members/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
 	// 카페가입 요청
-	m.HandleFunc("/member/{cafeId:[0-9]+}/join/request", h.requestJoin).Methods(http.MethodPost)
+	m.HandleFunc("/members/{cafeId:[0-9]+}/join/{userId:[0-9]+}", h.requestJoin).Methods(http.MethodPost)
 	// 밴목록 확인
-	m.HandleFunc("/member/{cafeId:[0-9]+}/ban", h.getBanedList).Methods(http.MethodGet)
+	m.HandleFunc("/members/{cafeId:[0-9]+}/ban", h.getBanedList).Methods(http.MethodGet)
 	// 밴상태 수정
-	m.HandleFunc("/member/{cafeId:[0-9]+}/ban", h.updateBan).Methods(http.MethodPatch)
+	m.HandleFunc("/members/{cafeId:[0-9]+}/ban", h.updateBan).Methods(http.MethodPatch)
 
 	// 카페 가입 요청 관리페이지
 	//m.HandleFunc("/member/join", h.getJoinReqList).Methods(http.MethodGet)
@@ -40,12 +47,44 @@ func NewHandler(c controller.MemberController) http.Handler {
 	return m
 }
 
-func (h Handler) getMyInfo(w http.ResponseWriter, r *http.Request) {
+func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
 
 }
 
 func (h Handler) requestJoin(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId, err := strconv.Atoi(vars["userId"])
+	if err != nil {
+		http.Error(w, "invalid userId", http.StatusUnauthorized)
+		return
+	}
+	cafeId, err := strconv.Atoi(vars["cafeId"])
+	if err != nil {
+		http.Error(w, "invalid cafeId", http.StatusBadRequest)
+		return
+	}
 
+	var dto req.JoinMemberDto
+	err = json.NewDecoder(r.Body).Decode(&dto)
+	if err != nil {
+		http.Error(w, "json decode error", http.StatusBadRequest)
+		return
+	}
+	err = h.c.RequestJoin(r.Context(), dto, cafeId, userId)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid") || strings.Contains(err.Error(), "empty") {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if strings.Contains(err.Error(), "duplicate") {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		log.Println("requestJoin err :", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (h Handler) processJoinReq(w http.ResponseWriter, r *http.Request) {
@@ -65,5 +104,9 @@ func (h Handler) updateBan(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) getMemberList(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h Handler) getMyCafeList(w http.ResponseWriter, r *http.Request) {
 
 }
