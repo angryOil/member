@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/uptrace/bun"
+	"log"
 	"member/internal/domain"
 	"member/internal/repository/model"
 	page2 "member/page"
@@ -34,6 +36,25 @@ func (r MemberRepository) GetCafeIdsByUserId(ctx context.Context, userId int, re
 		return []int{}, 0, err
 	}
 	return ids, cnt, err
+}
+
+func (r MemberRepository) GetMemberInfo(ctx context.Context, cafeId int, userId int) (md domain.MemberDomain, err error) {
+	var mModel []model.Member
+	defer func() {
+		if err != nil {
+			log.Println("GetMemberInfo err: ", err)
+			err = errors.New("internal server error")
+		}
+	}()
+	err = r.db.NewSelect().Model(&mModel).Where("cafe_id = ? and  user_id = ?", cafeId, userId).Scan(ctx)
+	if err != nil {
+		return md, err
+	}
+	if len(mModel) == 0 {
+		return md, nil
+	}
+	md = mModel[0].ToDomain()
+	return md, nil
 }
 
 func NewMemberRepository(db bun.IDB) MemberRepository {

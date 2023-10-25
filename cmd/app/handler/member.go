@@ -54,7 +54,33 @@ func NewHandler(c controller.MemberController) http.Handler {
 }
 
 func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId, err := strconv.Atoi(vars["userId"])
+	if err != nil {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+	cafeId, err := strconv.Atoi(vars["cafeId"])
+	if err != nil {
+		http.Error(w, "invalid cafe id", http.StatusBadRequest)
+	}
+	dto, err := h.c.GetMemberInfo(r.Context(), cafeId, userId)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid") {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 
+	data, err := json.Marshal(dto)
+	if err != nil {
+		log.Println("getMemberInfo marshal err: ", err)
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 func (h Handler) getMyCafeIdList(w http.ResponseWriter, r *http.Request) {

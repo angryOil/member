@@ -26,6 +26,17 @@ func (s MemberService) GetJoinCafeIds(ctx context.Context, userId int, reqPage p
 	return cafeIds, count, err
 }
 
+func (s MemberService) GetMemberInfo(ctx context.Context, cafeId int, userId int) (domain.MemberDomain, error) {
+	if cafeId == 0 {
+		return domain.MemberDomain{}, errors.New("invalid cafe id")
+	}
+	if userId == 0 {
+		return domain.MemberDomain{}, errors.New("invalid user id")
+	}
+	md, err := s.repo.GetMemberInfo(ctx, cafeId, userId)
+	return md, err
+}
+
 func validRequestMember(m domain.MemberDomain) error {
 	if m.Nickname == "" {
 		return errors.New("nickname is empty")
