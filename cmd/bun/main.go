@@ -1,11 +1,12 @@
 package main
 
 import (
-	"auth/cmd/bun/migrations"
-	"auth/repository/infla"
 	"fmt"
 	"github.com/uptrace/bun/migrate"
+	"github.com/urfave/cli/v2"
 	"log"
+	"member/cmd/bun/migrations"
+	"member/internal/repository/infla"
 	"os"
 	"strings"
 )
