@@ -75,6 +75,27 @@ func (r MemberRepository) GetMemberList(ctx context.Context, cafeId int, isBanne
 	return model.ToDomainList(mModels), cnt, nil
 }
 
+func (r MemberRepository) PatchMember(ctx context.Context, memberId int, cafeId int,
+	validFindFunc func([]domain.MemberDomain) (domain.MemberDomain, error), // repo 에서 조회한 결과를 validate 함
+	mergeFunc func(domain.MemberDomain) domain.MemberDomain) error {
+	var findModels []model.Member
+	err := r.db.NewSelect().Model(&findModels).Where("id = ? and cafe_id = ?", memberId, cafeId).Scan(ctx)
+	if err != nil {
+		log.Println("PatchMember find member err: ", err)
+		return errors.New("internal server error")
+	}
+
+	domains := model.ToDomainList(findModels)
+	validDimain, err := validFindFunc(domains)
+	if err != nil {
+		return err
+	}
+	mergedDomain := mergeFunc(validDimain)
+	mergedModel := model.ToModel(mergedDomain)
+	_, err = r.db.NewInsert().Model(&mergedModel).On("CONFLICT (id) DO UPDATE").Exec(ctx)
+	return err
+}
+
 func NewMemberRepository(db bun.IDB) MemberRepository {
 	return MemberRepository{db: db}
 }

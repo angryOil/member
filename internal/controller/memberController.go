@@ -14,6 +14,10 @@ type MemberController struct {
 	s service.MemberService
 }
 
+func NewMemberController(s service.MemberService) MemberController {
+	return MemberController{s: s}
+}
+
 func (c MemberController) RequestJoin(ctx context.Context, dto req.JoinMemberDto, cafeId int, userId int) error {
 	d := dto.ToDomain(cafeId, userId)
 	err := c.s.RequestJoin(ctx, d)
@@ -47,6 +51,8 @@ func (c MemberController) GetMemberList(ctx context.Context, cafeId int, isBanne
 	return res.NewMemberInfoListCountDto(res.ToMemberInfoList(mDomainList), count), nil
 }
 
-func NewMemberController(s service.MemberService) MemberController {
-	return MemberController{s: s}
+func (c MemberController) PatchMember(ctx context.Context, cafeId int, dto req.PatchMemberDto) error {
+	d := dto.ToDomain(cafeId)
+	err := c.s.PatchMember(ctx, d)
+	return err
 }
