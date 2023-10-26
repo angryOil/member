@@ -39,6 +39,14 @@ func (m Member) ToDomain() domain.MemberDomain {
 	}
 }
 
+func ToDomainList(mList []Member) []domain.MemberDomain {
+	domainList := make([]domain.MemberDomain, len(mList))
+	for i, m := range mList {
+		domainList[i] = m.ToDomain()
+	}
+	return domainList
+}
+
 type CafeIdModel struct {
 	bun.BaseModel `bun:"table:members,alias:m"`
 	CafeId        int `bun:"cafe_id,notnull"`
