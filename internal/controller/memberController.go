@@ -39,8 +39,8 @@ func (c MemberController) GetMemberInfo(ctx context.Context, cafeId int, userId 
 
 }
 
-func (c MemberController) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) (res.MemberInfoListCountDto, error) {
-	mDomainList, count, err := c.s.GetMemberList(ctx, cafeId, reqPage)
+func (c MemberController) GetMemberList(ctx context.Context, cafeId int, isBanned bool, reqPage page2.ReqPage) (res.MemberInfoListCountDto, error) {
+	mDomainList, count, err := c.s.GetMemberList(ctx, cafeId, isBanned, reqPage)
 	if err != nil {
 		return res.MemberInfoListCountDto{}, err
 	}

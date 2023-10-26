@@ -39,10 +39,8 @@ func NewHandler(c controller.MemberController) http.Handler {
 
 	// 관리자 기능
 
-	// 가입한 멤버 리스트 조회
+	// 가입한 멤버 리스트 조회 , 밴목록은 query로 받게 수정
 	m.HandleFunc("/members/admin/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
-	// 밴목록 확인
-	m.HandleFunc("/members/admin/{cafeId:[0-9]+}/ban", h.getBanedList).Methods(http.MethodGet)
 	// 밴상태 수정
 	m.HandleFunc("/members/admin/{cafeId:[0-9]+}/ban", h.updateBan).Methods(http.MethodPatch)
 
@@ -147,6 +145,9 @@ func (h Handler) requestJoin(w http.ResponseWriter, r *http.Request) {
 // 관리자  cafe API 에서 자체적으로 올바른 요청인지(권한)을 확인해야함
 func (h Handler) getMemberList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	// 벤리스트인지 확인
+	isBanned := r.URL.Query().Get("ban") == "true"
+	log.Println("ban?", isBanned)
 	cafeId, err := strconv.Atoi(vars["cafeId"])
 	if err != nil {
 		http.Error(w, "invalid cafe id ", http.StatusBadRequest)
@@ -162,7 +163,7 @@ func (h Handler) getMemberList(w http.ResponseWriter, r *http.Request) {
 		size = 0
 	}
 	reqPage := page2.NewReqPage(page, size)
-	memberInfoListCountDto, err := h.c.GetMemberList(r.Context(), cafeId, reqPage)
+	memberInfoListCountDto, err := h.c.GetMemberList(r.Context(), cafeId, isBanned, reqPage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -176,10 +177,6 @@ func (h Handler) getMemberList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
-}
-
-func (h Handler) getBanedList(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func (h Handler) updateBan(w http.ResponseWriter, r *http.Request) {

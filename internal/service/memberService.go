@@ -37,8 +37,8 @@ func (s MemberService) GetMemberInfo(ctx context.Context, cafeId int, userId int
 	return md, err
 }
 
-func (s MemberService) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
-	mDomains, count, err := s.repo.GetMemberList(ctx, cafeId, reqPage)
+func (s MemberService) GetMemberList(ctx context.Context, cafeId int, isBanned bool, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
+	mDomains, count, err := s.repo.GetMemberList(ctx, cafeId, isBanned, reqPage)
 	return mDomains, count, err
 }
 
