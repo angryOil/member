@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// 가입한 cafe id list 페이지용 dto
+
 type IdTotalCountDto struct {
 	Ids   []int `json:"ids"`
 	Total int   `json:"total"`
@@ -17,15 +19,37 @@ func NewIdTotalCountDto(ids []int, total int) IdTotalCountDto {
 	}
 }
 
-type MemberCafeInfoDto struct {
+// 해당 카페  member dto
+
+type MemberInfoDto struct {
 	MemberId  int    `json:"member_id,omitempty"`
 	NickName  string `json:"nick_name,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 	IsBanned  bool   `json:"is_banned"`
 }
 
-func ToMemberCafeInfoDto(d domain.MemberDomain) MemberCafeInfoDto {
-	return MemberCafeInfoDto{
+func ToMemberInfoList(dList []domain.MemberDomain) []MemberInfoDto {
+	infoList := make([]MemberInfoDto, len(dList))
+	for i, d := range dList {
+		infoList[i] = ToMemberInfoDto(d)
+	}
+	return infoList
+}
+
+type MemberInfoListCountDto struct {
+	Members []MemberInfoDto `json:"members"`
+	Count   int             `json:"count"`
+}
+
+func NewMemberInfoListCountDto(members []MemberInfoDto, total int) MemberInfoListCountDto {
+	return MemberInfoListCountDto{
+		Members: members,
+		Count:   total,
+	}
+}
+
+func ToMemberInfoDto(d domain.MemberDomain) MemberInfoDto {
+	return MemberInfoDto{
 		MemberId:  d.Id,
 		NickName:  d.Nickname,
 		CreatedAt: convertTimeToString(d.CreatedAt),

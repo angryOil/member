@@ -57,6 +57,24 @@ func (r MemberRepository) GetMemberInfo(ctx context.Context, cafeId int, userId 
 	return md, nil
 }
 
+func (r MemberRepository) GetMemberList(ctx context.Context, cafeId int, isBanned bool, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
+	var mModels []model.Member
+	query := r.db.NewSelect().Model(&mModels).Where("cafe_id = ? and is_banned = ?", cafeId, isBanned)
+	err := query.Limit(reqPage.Size).Offset(reqPage.OffSet).Order("id desc").Scan(ctx)
+	if err != nil {
+		log.Println("GetMemberList scan err: ", err)
+		return []domain.MemberDomain{}, 0, errors.New("internal server error")
+	}
+
+	cnt, err := query.Count(ctx)
+	if err != nil {
+		log.Println("GetMemberList count err: ", err)
+		return []domain.MemberDomain{}, 0, errors.New("internal server error")
+	}
+
+	return model.ToDomainList(mModels), cnt, nil
+}
+
 func NewMemberRepository(db bun.IDB) MemberRepository {
 	return MemberRepository{db: db}
 }

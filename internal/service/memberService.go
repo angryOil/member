@@ -37,6 +37,11 @@ func (s MemberService) GetMemberInfo(ctx context.Context, cafeId int, userId int
 	return md, err
 }
 
+func (s MemberService) GetMemberList(ctx context.Context, cafeId int, isBanned bool, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
+	mDomains, count, err := s.repo.GetMemberList(ctx, cafeId, isBanned, reqPage)
+	return mDomains, count, err
+}
+
 func validRequestMember(m domain.MemberDomain) error {
 	if m.Nickname == "" {
 		return errors.New("nickname is empty")
