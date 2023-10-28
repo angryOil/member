@@ -22,10 +22,10 @@ func NewIdTotalCountDto(ids []int, total int) IdTotalCountDto {
 // 해당 카페  member dto
 
 type MemberInfoDto struct {
-	MemberId  int    `json:"member_id,omitempty"`
-	NickName  string `json:"nick_name,omitempty"`
+	Id        int    `json:"member_id,omitempty"`
+	NickName  string `json:"nickname,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
-	IsBanned  bool   `json:"is_banned"`
+	IsBanned  bool   `json:"is_banned,omitempty"`
 }
 
 func ToMemberInfoList(dList []domain.MemberDomain) []MemberInfoDto {
@@ -50,7 +50,7 @@ func NewMemberInfoListCountDto(members []MemberInfoDto, total int) MemberInfoLis
 
 func ToMemberInfoDto(d domain.MemberDomain) MemberInfoDto {
 	return MemberInfoDto{
-		MemberId:  d.Id,
+		Id:        d.Id,
 		NickName:  d.Nickname,
 		CreatedAt: convertTimeToString(d.CreatedAt),
 		IsBanned:  d.IsBanned,

@@ -75,6 +75,8 @@ func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(dto)
 	if err != nil {
 		log.Println("getMemberInfo marshal err: ", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
 	}
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
