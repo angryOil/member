@@ -82,6 +82,11 @@ func (s MemberService) PatchMember(ctx context.Context, d domain.MemberDomain) e
 	return err
 }
 
+func (s MemberService) GetMemberInfoByMemberCafeId(ctx context.Context, memberId int, cafeId int) (domain.MemberDomain, error) {
+	mDomain, err := s.repo.GetMemberByMemberCafeId(ctx, memberId, cafeId)
+	return mDomain, err
+}
+
 func patchMemberValid(d domain.MemberDomain) error {
 	if d.CafeId == 0 {
 		return errors.New("invalid cafe id")

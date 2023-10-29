@@ -56,3 +56,11 @@ func (c MemberController) PatchMember(ctx context.Context, cafeId int, userId in
 	err := c.s.PatchMember(ctx, d)
 	return err
 }
+
+func (c MemberController) GetInfoByMemberId(ctx context.Context, memberId int, cafeId int) (res.MemberInfoDto, error) {
+	mDomain, err := c.s.GetMemberInfoByMemberCafeId(ctx, memberId, cafeId)
+	if err != nil {
+		return res.MemberInfoDto{}, err
+	}
+	return res.ToMemberInfoDto(mDomain), nil
+}
