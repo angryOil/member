@@ -23,6 +23,7 @@ func NewIdTotalCountDto(ids []int, total int) IdTotalCountDto {
 
 type MemberInfoDto struct {
 	Id        int    `json:"member_id,omitempty"`
+	UserId    int    `json:"user_id"`
 	NickName  string `json:"nickname,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 }
@@ -50,6 +51,7 @@ func NewMemberInfoListCountDto(members []MemberInfoDto, total int) MemberInfoLis
 func ToMemberInfoDto(d domain.MemberDomain) MemberInfoDto {
 	return MemberInfoDto{
 		Id:        d.Id,
+		UserId:    d.UserId,
 		NickName:  d.Nickname,
 		CreatedAt: convertTimeToString(d.CreatedAt),
 	}
