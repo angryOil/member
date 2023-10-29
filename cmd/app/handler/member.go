@@ -41,6 +41,9 @@ func NewHandler(c controller.MemberController) http.Handler {
 	m.HandleFunc("/members/{cafeId:[0-9]+}/modify/{userId:[0-9]+}", h.patchMember).Methods(http.MethodPatch)
 
 	// 관리자
+	// 해당 카페에 가입되있는 멤버인지 확인
+	// todo 정말 이 url 이 괜찮은건지.... 고민해보기 ..
+	m.HandleFunc("/members/admin/{cafeId:[0-9]+}/{memberId:[0-9]+}", h.getInfoByMemberId)
 	// 멤버 리스트 조회
 	m.HandleFunc("/members/admin/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
 	// 멤버 수정 기능
@@ -211,4 +214,33 @@ func (h Handler) patchMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func (h Handler) getInfoByMemberId(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	memberId, err := strconv.Atoi(vars["memberId"])
+	if err != nil {
+		http.Error(w, "invalid member id", http.StatusBadRequest)
+		return
+	}
+	cafeId, err := strconv.Atoi(vars["cafeId"])
+	if err != nil {
+		http.Error(w, "invalid cafe id", http.StatusBadRequest)
+		return
+	}
+
+	infoDto, err := h.c.GetInfoByMemberId(r.Context(), memberId, cafeId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(infoDto)
+	if err != nil {
+		log.Println("getInfoByMemberId json.Marshal err: ", err)
+		http.Error(w, "interal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }

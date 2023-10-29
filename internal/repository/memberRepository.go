@@ -14,6 +14,10 @@ type MemberRepository struct {
 	db bun.IDB
 }
 
+func NewMemberRepository(db bun.IDB) MemberRepository {
+	return MemberRepository{db: db}
+}
+
 func (r MemberRepository) CreateMember(ctx context.Context, d domain.MemberDomain) error {
 	mModel := model.ToModel(d)
 	_, err := r.db.NewInsert().Model(&mModel).Exec(ctx)
@@ -96,6 +100,15 @@ func (r MemberRepository) PatchMember(ctx context.Context, cafeId int, userId in
 	return err
 }
 
-func NewMemberRepository(db bun.IDB) MemberRepository {
-	return MemberRepository{db: db}
+func (r MemberRepository) GetMemberByMemberCafeId(ctx context.Context, memberId int, cafeId int) (domain.MemberDomain, error) {
+	var mModels []model.Member
+	err := r.db.NewSelect().Model(&mModels).Where("id = ? and cafe_id = ?", memberId, cafeId).Scan(ctx)
+	if err != nil {
+		log.Println("GetMemberByMemberCafeId select err: ", err)
+		return domain.MemberDomain{}, errors.New("internal server error")
+	}
+	if len(mModels) == 0 {
+		return domain.MemberDomain{}, nil
+	}
+	return mModels[0].ToDomain(), nil
 }
