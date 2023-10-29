@@ -56,8 +56,8 @@ func (s MemberService) GetMemberInfo(ctx context.Context, cafeId int, userId int
 
 // 아래부턴 admin 기능
 
-func (s MemberService) GetMemberList(ctx context.Context, cafeId int, isBanned bool, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
-	mDomains, count, err := s.repo.GetMemberList(ctx, cafeId, isBanned, reqPage)
+func (s MemberService) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
+	mDomains, count, err := s.repo.GetMemberList(ctx, cafeId, reqPage)
 	return mDomains, count, err
 }
 
@@ -67,7 +67,7 @@ func (s MemberService) PatchMember(ctx context.Context, d domain.MemberDomain) e
 		return err
 	}
 
-	err = s.repo.PatchMember(ctx, d.Id, d.CafeId,
+	err = s.repo.PatchMember(ctx, d.CafeId, d.UserId,
 		func(findDomains []domain.MemberDomain) (domain.MemberDomain, error) {
 			if len(findDomains) == 0 {
 				return domain.MemberDomain{}, errors.New("no rows error")
@@ -75,7 +75,7 @@ func (s MemberService) PatchMember(ctx context.Context, d domain.MemberDomain) e
 			return findDomains[0], nil
 		},
 		func(m domain.MemberDomain) domain.MemberDomain {
-			m.IsBanned = d.IsBanned
+			m.Nickname = d.Nickname
 			return m
 		},
 	)
@@ -83,11 +83,14 @@ func (s MemberService) PatchMember(ctx context.Context, d domain.MemberDomain) e
 }
 
 func patchMemberValid(d domain.MemberDomain) error {
-	if d.Id == 0 {
-		return errors.New("invalid member id")
-	}
 	if d.CafeId == 0 {
 		return errors.New("invalid cafe id")
+	}
+	if d.UserId == 0 {
+		return errors.New("invalid user id")
+	}
+	if d.Nickname == "" {
+		return errors.New("invalid nickname")
 	}
 	return nil
 }

@@ -25,7 +25,6 @@ type MemberInfoDto struct {
 	Id        int    `json:"member_id,omitempty"`
 	NickName  string `json:"nickname,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
-	IsBanned  bool   `json:"is_banned,omitempty"`
 }
 
 func ToMemberInfoList(dList []domain.MemberDomain) []MemberInfoDto {
@@ -53,7 +52,6 @@ func ToMemberInfoDto(d domain.MemberDomain) MemberInfoDto {
 		Id:        d.Id,
 		NickName:  d.Nickname,
 		CreatedAt: convertTimeToString(d.CreatedAt),
-		IsBanned:  d.IsBanned,
 	}
 }
 
