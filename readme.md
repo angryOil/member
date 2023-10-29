@@ -23,6 +23,7 @@ member{ //cafe_id + user_id = uniq_key
     nickname
     create_at
 }
+
 ```
 
 ### makefile
