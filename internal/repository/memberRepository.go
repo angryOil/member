@@ -57,6 +57,45 @@ func (r MemberRepository) GetMemberInfo(ctx context.Context, cafeId int, userId 
 	return md, nil
 }
 
+func (r MemberRepository) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) ([]domain.MemberDomain, int, error) {
+	var mModels []model.Member
+	query := r.db.NewSelect().Model(&mModels).Where("cafe_id = ?", cafeId)
+	err := query.Limit(reqPage.Size).Offset(reqPage.OffSet).Order("id desc").Scan(ctx)
+	if err != nil {
+		log.Println("GetMemberList scan err: ", err)
+		return []domain.MemberDomain{}, 0, errors.New("internal server error")
+	}
+
+	cnt, err := query.Count(ctx)
+	if err != nil {
+		log.Println("GetMemberList count err: ", err)
+		return []domain.MemberDomain{}, 0, errors.New("internal server error")
+	}
+
+	return model.ToDomainList(mModels), cnt, nil
+}
+
+func (r MemberRepository) PatchMember(ctx context.Context, cafeId int, userId int,
+	validFindFunc func([]domain.MemberDomain) (domain.MemberDomain, error), // repo 에서 조회한 결과를 validate 함
+	mergeFunc func(domain.MemberDomain) domain.MemberDomain) error {
+	var findModels []model.Member
+	err := r.db.NewSelect().Model(&findModels).Where("cafe_id = ? and user_id = ?", cafeId, userId).Scan(ctx)
+	if err != nil {
+		log.Println("PatchMember find member err: ", err)
+		return errors.New("internal server error")
+	}
+
+	domains := model.ToDomainList(findModels)
+	validDimain, err := validFindFunc(domains)
+	if err != nil {
+		return err
+	}
+	mergedDomain := mergeFunc(validDimain)
+	mergedModel := model.ToModel(mergedDomain)
+	_, err = r.db.NewInsert().Model(&mergedModel).On("CONFLICT (id) DO UPDATE").Exec(ctx)
+	return err
+}
+
 func NewMemberRepository(db bun.IDB) MemberRepository {
 	return MemberRepository{db: db}
 }

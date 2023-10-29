@@ -12,7 +12,7 @@ pr 순서 feat => dev => (hotfix/bug)stage => main
 
 cafe Api에서 멤버 관련요청을합니다.
 
-주기능은 cafe_id + user_id 를 통한 회원조회, 카페가입요청,요청 수락/거절 , 카페 벤 입니다.
+주기능은 cafe_id + user_id 를 통한 회원조회, 카페가입요청 입니다.
 
 ## entity 구조
 ```text
@@ -21,7 +21,6 @@ member{ //cafe_id + user_id = uniq_key
     cafe_id
     user_id 
     nickname
-    is_banned
     create_at
 }
 ```

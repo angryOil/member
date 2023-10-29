@@ -13,7 +13,6 @@ type Member struct {
 	CafeId    int       `bun:"cafe_id,notnull"`
 	UserId    int       `bun:"user_id,notnull"`
 	Nickname  string    `bun:"nickname,notnull"`
-	IsBanned  bool      `bun:"is_banned,notnull"`
 	CreatedAt time.Time `bun:"created_at,notnull"`
 }
 
@@ -23,7 +22,6 @@ func ToModel(d domain.MemberDomain) Member {
 		CafeId:    d.CafeId,
 		UserId:    d.UserId,
 		Nickname:  d.Nickname,
-		IsBanned:  d.IsBanned,
 		CreatedAt: d.CreatedAt,
 	}
 }
@@ -34,9 +32,16 @@ func (m Member) ToDomain() domain.MemberDomain {
 		CafeId:    m.CafeId,
 		UserId:    m.UserId,
 		Nickname:  m.Nickname,
-		IsBanned:  m.IsBanned,
 		CreatedAt: m.CreatedAt,
 	}
+}
+
+func ToDomainList(mList []Member) []domain.MemberDomain {
+	domainList := make([]domain.MemberDomain, len(mList))
+	for i, m := range mList {
+		domainList[i] = m.ToDomain()
+	}
+	return domainList
 }
 
 type CafeIdModel struct {

@@ -14,6 +14,10 @@ type MemberController struct {
 	s service.MemberService
 }
 
+func NewMemberController(s service.MemberService) MemberController {
+	return MemberController{s: s}
+}
+
 func (c MemberController) RequestJoin(ctx context.Context, dto req.JoinMemberDto, cafeId int, userId int) error {
 	d := dto.ToDomain(cafeId, userId)
 	err := c.s.RequestJoin(ctx, d)
@@ -29,16 +33,26 @@ func (c MemberController) GetJoinCafeIds(ctx context.Context, userId int, reqPag
 	return res.NewIdTotalCountDto(cafeIds, count), nil
 }
 
-func (c MemberController) GetMemberInfo(ctx context.Context, cafeId int, userId int) (res.MemberCafeInfoDto, error) {
+func (c MemberController) GetMemberInfo(ctx context.Context, cafeId int, userId int) (res.MemberInfoDto, error) {
 	md, err := c.s.GetMemberInfo(ctx, cafeId, userId)
 	if err != nil {
-		return res.MemberCafeInfoDto{}, err
+		return res.MemberInfoDto{}, err
 	}
-	dto := res.ToMemberCafeInfoDto(md)
+	dto := res.ToMemberInfoDto(md)
 	return dto, nil
 
 }
 
-func NewMemberController(s service.MemberService) MemberController {
-	return MemberController{s: s}
+func (c MemberController) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) (res.MemberInfoListCountDto, error) {
+	mDomainList, count, err := c.s.GetMemberList(ctx, cafeId, reqPage)
+	if err != nil {
+		return res.MemberInfoListCountDto{}, err
+	}
+	return res.NewMemberInfoListCountDto(res.ToMemberInfoList(mDomainList), count), nil
+}
+
+func (c MemberController) PatchMember(ctx context.Context, cafeId int, userId int, dto req.PatchMemberDto) error {
+	d := dto.ToDomain(cafeId, userId)
+	err := c.s.PatchMember(ctx, d)
+	return err
 }
