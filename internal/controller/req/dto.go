@@ -14,20 +14,18 @@ func (d JoinMemberDto) ToDomain(cafeId, userId int) domain.MemberDomain {
 		CafeId:    cafeId,
 		UserId:    userId,
 		Nickname:  d.Nickname,
-		IsBanned:  false,
 		CreatedAt: time.Now(),
 	}
 }
 
 type PatchMemberDto struct {
-	MemberId int  `json:"member_id"`
-	IsBanned bool `json:"is_banned"`
+	Nickname string `json:"nickname"`
 }
 
-func (d PatchMemberDto) ToDomain(cafeId int) domain.MemberDomain {
+func (d PatchMemberDto) ToDomain(cafeId, userId int) domain.MemberDomain {
 	return domain.MemberDomain{
-		Id:       d.MemberId,
+		UserId:   userId,
 		CafeId:   cafeId,
-		IsBanned: d.IsBanned,
+		Nickname: d.Nickname,
 	}
 }

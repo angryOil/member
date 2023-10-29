@@ -8,7 +8,6 @@ CREATE TABLE "public"."members"
     user_id    int         not null,
     cafe_id    int         not null,
     nickname   VARCHAR(50) NOT NULL,
-    is_banned  bool        not null default false,
     created_at timestamptz
 );
 

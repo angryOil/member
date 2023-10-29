@@ -7,6 +7,5 @@ type MemberDomain struct {
 	CafeId    int
 	UserId    int
 	Nickname  string
-	IsBanned  bool
 	CreatedAt time.Time
 }

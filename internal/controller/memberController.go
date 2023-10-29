@@ -43,16 +43,16 @@ func (c MemberController) GetMemberInfo(ctx context.Context, cafeId int, userId 
 
 }
 
-func (c MemberController) GetMemberList(ctx context.Context, cafeId int, isBanned bool, reqPage page2.ReqPage) (res.MemberInfoListCountDto, error) {
-	mDomainList, count, err := c.s.GetMemberList(ctx, cafeId, isBanned, reqPage)
+func (c MemberController) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) (res.MemberInfoListCountDto, error) {
+	mDomainList, count, err := c.s.GetMemberList(ctx, cafeId, reqPage)
 	if err != nil {
 		return res.MemberInfoListCountDto{}, err
 	}
 	return res.NewMemberInfoListCountDto(res.ToMemberInfoList(mDomainList), count), nil
 }
 
-func (c MemberController) PatchMember(ctx context.Context, cafeId int, dto req.PatchMemberDto) error {
-	d := dto.ToDomain(cafeId)
+func (c MemberController) PatchMember(ctx context.Context, cafeId int, userId int, dto req.PatchMemberDto) error {
+	d := dto.ToDomain(cafeId, userId)
 	err := c.s.PatchMember(ctx, d)
 	return err
 }
