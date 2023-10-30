@@ -112,3 +112,13 @@ func (r MemberRepository) GetMemberByMemberCafeId(ctx context.Context, memberId 
 	}
 	return mModels[0].ToDomain(), nil
 }
+
+func (r MemberRepository) GetMemberListByIds(ctx context.Context, idsArr []int) ([]domain.MemberDomain, error) {
+	var mModels []model.Member
+	err := r.db.NewSelect().Model(&mModels).Where("id in (?)", bun.In(idsArr)).Scan(ctx)
+	if err != nil {
+		log.Println("GetMemberListByIds NewSelect err: ", err)
+		return []domain.MemberDomain{}, errors.New("internal server error")
+	}
+	return model.ToDomainList(mModels), nil
+}

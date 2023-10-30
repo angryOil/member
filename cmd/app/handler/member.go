@@ -43,7 +43,8 @@ func NewHandler(c controller.MemberController) http.Handler {
 	// 관리자
 	// 해당 카페에 가입되있는 멤버인지 확인
 	// todo 정말 이 url 이 괜찮은건지.... 고민해보기 ..
-	m.HandleFunc("/members/admin/{cafeId:[0-9]+}/{memberId:[0-9]+}", h.getInfoByMemberId)
+	m.HandleFunc("/members/admin", h.getMemberByMemberIds).Methods(http.MethodGet)
+	m.HandleFunc("/members/admin/{cafeId:[0-9]+}/{memberId:[0-9]+}", h.getInfoByMemberId).Methods(http.MethodGet)
 	// 멤버 리스트 조회
 	m.HandleFunc("/members/admin/{cafeId:[0-9]+}", h.getMemberList).Methods(http.MethodGet)
 	// 멤버 수정 기능
@@ -243,4 +244,41 @@ func (h Handler) getInfoByMemberId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
+}
+
+func (h Handler) getMemberByMemberIds(w http.ResponseWriter, r *http.Request) {
+	memberIdsStr := r.URL.Query().Get("memberIds")
+	if memberIdsStr == "" {
+		http.Error(w, "invalid memberIds", http.StatusBadRequest)
+		return
+	}
+	idsArr := stringToIntArr(memberIdsStr)
+	dtos, err := h.c.GetMemberListByMemberIds(r.Context(), idsArr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(dtos)
+	if err != nil {
+		log.Println("getMemberByMemberIds json.Marshal err:", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+func stringToIntArr(s string) []int {
+	s = strings.ReplaceAll(s, " ", "")
+	sArr := strings.Split(s, ",")
+	intArr := make([]int, 0)
+	for _, s := range sArr {
+		i, err := strconv.Atoi(s)
+		if err != nil {
+			continue
+		}
+		intArr = append(intArr, i)
+	}
+	return intArr
 }
