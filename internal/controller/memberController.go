@@ -64,3 +64,11 @@ func (c MemberController) GetInfoByMemberId(ctx context.Context, memberId int, c
 	}
 	return res.ToMemberInfoDto(mDomain), nil
 }
+
+func (c MemberController) GetMemberListByMemberIds(ctx context.Context, idsArr []int) ([]res.MemberInfoDto, error) {
+	domains, err := c.s.GetMemberListByMemberIds(ctx, idsArr)
+	if err != nil {
+		return []res.MemberInfoDto{}, err
+	}
+	return res.ToMemberInfoList(domains), nil
+}
