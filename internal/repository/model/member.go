@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/uptrace/bun"
 	"member/internal/domain"
+	"member/internal/repository/request"
 	"time"
 )
 
@@ -16,28 +17,37 @@ type Member struct {
 	CreatedAt time.Time `bun:"created_at,notnull"`
 }
 
-func ToModel(d domain.MemberDomain) Member {
+func ToCreateModel(cm request.CreateMember) Member {
 	return Member{
-		Id:        d.Id,
-		CafeId:    d.CafeId,
-		UserId:    d.UserId,
-		Nickname:  d.Nickname,
-		CreatedAt: d.CreatedAt,
+		CafeId:    cm.CafeId,
+		UserId:    cm.UserId,
+		Nickname:  cm.Nickname,
+		CreatedAt: cm.CreatedAt,
 	}
 }
 
-func (m Member) ToDomain() domain.MemberDomain {
-	return domain.MemberDomain{
-		Id:        m.Id,
-		CafeId:    m.CafeId,
-		UserId:    m.UserId,
-		Nickname:  m.Nickname,
-		CreatedAt: m.CreatedAt,
+func ToPatchModel(pm request.PatchMember) Member {
+	return Member{
+		Id:        pm.Id,
+		CafeId:    pm.CafeId,
+		UserId:    pm.UserId,
+		Nickname:  pm.Nickname,
+		CreatedAt: pm.CreatedAt,
 	}
 }
 
-func ToDomainList(mList []Member) []domain.MemberDomain {
-	domainList := make([]domain.MemberDomain, len(mList))
+func (m Member) ToDomain() domain.Member {
+	return domain.NewMemberBuilder().
+		Id(m.Id).
+		CafeId(m.CafeId).
+		UserId(m.UserId).
+		Nickname(m.Nickname).
+		CreatedAt(m.CreatedAt).
+		Build()
+}
+
+func ToDomainList(mList []Member) []domain.Member {
+	domainList := make([]domain.Member, len(mList))
 	for i, m := range mList {
 		domainList[i] = m.ToDomain()
 	}

@@ -7,6 +7,8 @@ import (
 	"member/internal/controller/req"
 	"member/internal/controller/res"
 	"member/internal/service"
+	req2 "member/internal/service/req"
+	res2 "member/internal/service/res"
 	page2 "member/page"
 )
 
@@ -18,9 +20,12 @@ func NewMemberController(s service.MemberService) MemberController {
 	return MemberController{s: s}
 }
 
-func (c MemberController) RequestJoin(ctx context.Context, dto req.JoinMemberDto, cafeId int, userId int) error {
-	d := dto.ToDomain(cafeId, userId)
-	err := c.s.RequestJoin(ctx, d)
+func (c MemberController) CreateMember(ctx context.Context, dto req.JoinMemberDto, cafeId int, userId int) error {
+	err := c.s.CreateMember(ctx, req2.CreateMember{
+		CafeId:   cafeId,
+		UserId:   userId,
+		Nickname: dto.Nickname,
+	})
 	return err
 }
 
@@ -34,13 +39,20 @@ func (c MemberController) GetJoinCafeIds(ctx context.Context, userId int, reqPag
 }
 
 func (c MemberController) GetMemberInfo(ctx context.Context, cafeId int, userId int) (res.MemberInfoDto, error) {
-	md, err := c.s.GetMemberInfo(ctx, cafeId, userId)
+	info, err := c.s.GetMemberInfo(ctx, cafeId, userId)
 	if err != nil {
 		return res.MemberInfoDto{}, err
 	}
-	dto := res.ToMemberInfoDto(md)
-	return dto, nil
+	return infoToDto(info), nil
+}
 
+func infoToDto(info res2.GetMemberInfo) res.MemberInfoDto {
+	return res.MemberInfoDto{
+		Id:        info.Id,
+		UserId:    info.UserId,
+		NickName:  info.Nickname,
+		CreatedAt: info.CreatedAt,
+	}
 }
 
 func (c MemberController) GetMemberList(ctx context.Context, cafeId int, reqPage page2.ReqPage) (res.MemberInfoListCountDto, error) {
@@ -51,14 +63,16 @@ func (c MemberController) GetMemberList(ctx context.Context, cafeId int, reqPage
 	return res.NewMemberInfoListCountDto(res.ToMemberInfoList(mDomainList), count), nil
 }
 
-func (c MemberController) PatchMember(ctx context.Context, cafeId int, userId int, dto req.PatchMemberDto) error {
-	d := dto.ToDomain(cafeId, userId)
-	err := c.s.PatchMember(ctx, d)
+func (c MemberController) PatchMember(ctx context.Context, id int, dto req.PatchMemberDto) error {
+	err := c.s.PatchMember(ctx, req2.PatchMember{
+		Id:       id,
+		Nickname: dto.Nickname,
+	})
 	return err
 }
 
-func (c MemberController) GetInfoByMemberId(ctx context.Context, memberId int, cafeId int) (res.MemberInfoDto, error) {
-	mDomain, err := c.s.GetMemberInfoByMemberCafeId(ctx, memberId, cafeId)
+func (c MemberController) GetInfoByMemberId(ctx context.Context, memberId int) (res.MemberInfoDto, error) {
+	mDomain, err := c.s.GetMemberInfoByMemberCafeId(ctx, memberId)
 	if err != nil {
 		return res.MemberInfoDto{}, err
 	}

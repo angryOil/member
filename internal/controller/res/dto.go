@@ -1,7 +1,8 @@
 package res
 
 import (
-	"member/internal/domain"
+	"member/internal/domain/vo"
+	"member/internal/service/res"
 	"time"
 )
 
@@ -23,12 +24,21 @@ func NewIdTotalCountDto(ids []int, total int) IdTotalCountDto {
 
 type MemberInfoDto struct {
 	Id        int    `json:"member_id,omitempty"`
-	UserId    int    `json:"user_id"`
+	UserId    int    `json:"user_id,omitempty"`
 	NickName  string `json:"nickname,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
-func ToMemberInfoList(dList []domain.MemberDomain) []MemberInfoDto {
+func ToInfoDto(v vo.MemberInfo) MemberInfoDto {
+	return MemberInfoDto{
+		Id:        v.Id,
+		UserId:    v.UserId,
+		NickName:  v.NickName,
+		CreatedAt: convertTimeToString(v.CreatedAt),
+	}
+}
+
+func ToMemberInfoList(dList []res.GetMemberInfo) []MemberInfoDto {
 	infoList := make([]MemberInfoDto, len(dList))
 	for i, d := range dList {
 		infoList[i] = ToMemberInfoDto(d)
@@ -48,12 +58,12 @@ func NewMemberInfoListCountDto(members []MemberInfoDto, total int) MemberInfoLis
 	}
 }
 
-func ToMemberInfoDto(d domain.MemberDomain) MemberInfoDto {
+func ToMemberInfoDto(info res.GetMemberInfo) MemberInfoDto {
 	return MemberInfoDto{
-		Id:        d.Id,
-		UserId:    d.UserId,
-		NickName:  d.Nickname,
-		CreatedAt: convertTimeToString(d.CreatedAt),
+		Id:        info.Id,
+		UserId:    info.UserId,
+		NickName:  info.Nickname,
+		CreatedAt: info.CreatedAt,
 	}
 }
 
