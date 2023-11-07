@@ -14,6 +14,7 @@ type Member struct {
 	CafeId    int       `bun:"cafe_id,notnull"`
 	UserId    int       `bun:"user_id,notnull"`
 	Nickname  string    `bun:"nickname,notnull"`
+	IsBanned  bool      `bun:"is_banned"`
 	CreatedAt time.Time `bun:"created_at,notnull"`
 }
 

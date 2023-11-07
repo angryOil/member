@@ -52,16 +52,24 @@ func NewHandler(c controller.MemberController) http.Handler {
 	return m
 }
 
+const (
+	InternalServerError = "internal server error"
+	InvalidUserId       = "invalid user id"
+	InvalidCafeId       = "invalid cafe id"
+	invalidMemberId     = "invalid member id"
+	invalidMemberIds    = "invalid member ids"
+)
+
 func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId, err := strconv.Atoi(vars["userId"])
 	if err != nil {
-		http.Error(w, "invalid user id", http.StatusBadRequest)
+		http.Error(w, InvalidUserId, http.StatusBadRequest)
 		return
 	}
 	cafeId, err := strconv.Atoi(vars["cafeId"])
 	if err != nil {
-		http.Error(w, "invalid cafe id", http.StatusBadRequest)
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
 	}
 	dto, err := h.c.GetMemberInfo(r.Context(), cafeId, userId)
 	if err != nil {
@@ -69,14 +77,14 @@ func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	data, err := json.Marshal(dto)
 	if err != nil {
 		log.Println("getMemberInfo marshal err: ", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
@@ -88,7 +96,7 @@ func (h Handler) getMyCafeIdList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId, err := strconv.Atoi(vars["userId"])
 	if err != nil {
-		http.Error(w, "invalid user id ", http.StatusBadRequest)
+		http.Error(w, InvalidUserId, http.StatusBadRequest)
 		return
 	}
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
@@ -113,12 +121,12 @@ func (h Handler) requestJoin(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId, err := strconv.Atoi(vars["userId"])
 	if err != nil {
-		http.Error(w, "invalid userId", http.StatusUnauthorized)
+		http.Error(w, InvalidUserId, http.StatusUnauthorized)
 		return
 	}
 	cafeId, err := strconv.Atoi(vars["cafeId"])
 	if err != nil {
-		http.Error(w, "invalid cafeId", http.StatusBadRequest)
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
 		return
 	}
 
@@ -139,7 +147,7 @@ func (h Handler) requestJoin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Println("requestJoin err :", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -150,7 +158,7 @@ func (h Handler) getMemberList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	cafeId, err := strconv.Atoi(vars["cafeId"])
 	if err != nil {
-		http.Error(w, "invalid cafe id ", http.StatusBadRequest)
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
 		return
 	}
 
@@ -183,7 +191,7 @@ func (h Handler) patchMember(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, "invalid cafe id ", http.StatusBadRequest)
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
 		return
 	}
 	var dto req.PatchMemberDto
@@ -216,7 +224,7 @@ func (h Handler) getInfoByMemberId(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	memberId, err := strconv.Atoi(vars["memberId"])
 	if err != nil {
-		http.Error(w, "invalid member id", http.StatusBadRequest)
+		http.Error(w, invalidMemberId, http.StatusBadRequest)
 		return
 	}
 
@@ -228,7 +236,7 @@ func (h Handler) getInfoByMemberId(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(infoDto)
 	if err != nil {
 		log.Println("getInfoByMemberId json.Marshal err: ", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
@@ -239,7 +247,7 @@ func (h Handler) getInfoByMemberId(w http.ResponseWriter, r *http.Request) {
 func (h Handler) getMemberByMemberIds(w http.ResponseWriter, r *http.Request) {
 	memberIdsStr := r.URL.Query().Get("memberIds")
 	if memberIdsStr == "" {
-		http.Error(w, "invalid memberIds", http.StatusBadRequest)
+		http.Error(w, invalidMemberIds, http.StatusBadRequest)
 		return
 	}
 	idsArr := stringToIntArr(memberIdsStr)
@@ -251,7 +259,7 @@ func (h Handler) getMemberByMemberIds(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(dtos)
 	if err != nil {
 		log.Println("getMemberByMemberIds json.Marshal err:", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")

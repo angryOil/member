@@ -10,7 +10,7 @@ var _ Member = (*member)(nil)
 
 type Member interface {
 	ValidCreate() error
-	ValidUpdate() error
+	ValidPatch() error
 
 	Patch(nickname string) Member
 	ToMemberInfo() vo.MemberInfo
@@ -69,7 +69,7 @@ func (m *member) ValidCreate() error {
 	return nil
 }
 
-func (m *member) ValidUpdate() error {
+func (m *member) ValidPatch() error {
 	if m.id < 1 {
 		return errors.New(InvalidId)
 	}

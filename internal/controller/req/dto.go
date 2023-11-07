@@ -21,11 +21,3 @@ func (d JoinMemberDto) ToDomain(cafeId, userId int) domain.Member {
 type PatchMemberDto struct {
 	Nickname string `json:"nickname"`
 }
-
-func (d PatchMemberDto) ToDomain(cafeId, userId int) domain.Member {
-	return domain.NewMemberBuilder().
-		UserId(userId).
-		CafeId(cafeId).
-		Nickname(d.Nickname).
-		Build()
-}

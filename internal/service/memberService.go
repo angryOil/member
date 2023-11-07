@@ -118,7 +118,7 @@ func (s MemberService) PatchMember(ctx context.Context, pm req.PatchMember) erro
 		Id(id).
 		Nickname(nickname).
 		Build().
-		ValidUpdate()
+		ValidPatch()
 
 	if err != nil {
 		return err
